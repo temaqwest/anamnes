@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Anamnes · Нет подключения</title>
+    <script>
+      try {
+        const theme = localStorage.getItem("anamnes.theme")
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+      } catch {}
+    </script>
+    <style>
+      :root { color-scheme: light dark; overscroll-behavior-y: none; }
+      :root[data-theme="light"] { color-scheme: light; }
+      :root[data-theme="dark"] { color-scheme: dark; }
+      body {
+        margin: 0;
+        background: #f6f7fb;
+        background: light-dark(#f6f7fb, #151623);
+        color: #20243b;
+        color: light-dark(#20243b, #eeedf7);
+        font: 1rem/1.5 system-ui, sans-serif;
+      }
+      main { box-sizing: border-box; max-width: 32rem; margin: 12vh auto; padding: 2rem; }
+      a {
+        display: inline-block;
+        padding: .65rem 1rem;
+        border-radius: .625rem;
+        color: #fff;
+        color: light-dark(#fff, #211b4c);
+        background: #4b46aa;
+        background: light-dark(#4b46aa, #b6afff);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Нет подключения</h1>
+      <p>Подключитесь к сети, чтобы открыть личный архив Anamnes.</p>
+      <a href="/">Вернуться в архив</a>
+    </main>
+  </body>
+</html>

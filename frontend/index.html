@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f6f7fb" />
+    <script>
+      try {
+        const theme = localStorage.getItem("anamnes.theme")
+        if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme
+      } catch {}
+    </script>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+    <title>Anamnes</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/entrypoint/main.tsx"></script>
+  </body>
+</html>

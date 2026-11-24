@@ -1,0 +1,16 @@
+*
+!manage.py
+!requirements-container.txt
+!anamnes/
+!anamnes/**
+!accounts/
+!accounts/**
+!archive/
+!archive/**
+!medications/
+!medications/**
+**/__pycache__/
+**/*.pyc
+**/.env*
+**/*.sqlite3*
+**/*.pdf

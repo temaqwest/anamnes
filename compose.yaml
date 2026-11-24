@@ -1,0 +1,88 @@
+x-backend: &backend
+  image: ${COMPOSE_PROJECT_NAME:-anamnes}-backend:local
+  environment:
+    DJANGO_DEBUG: "0"
+    DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Set DJANGO_SECRET_KEY in .env}
+    DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+    DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+    DJANGO_SECURE_COOKIES: ${DJANGO_SECURE_COOKIES:-0}
+    DJANGO_TRUST_PROXY_PROTO: "1"
+    ANAMNES_SIGNUP_ENABLED: ${ANAMNES_SIGNUP_ENABLED:-0}
+    ANAMNES_PUBLIC_URL: ${ANAMNES_PUBLIC_URL:-http://127.0.0.1:5186}
+    DJANGO_EMAIL_BACKEND: ${DJANGO_EMAIL_BACKEND:-django.core.mail.backends.smtp.EmailBackend}
+    DJANGO_EMAIL_HOST: ${DJANGO_EMAIL_HOST:-localhost}
+    DJANGO_EMAIL_PORT: ${DJANGO_EMAIL_PORT:-25}
+    DJANGO_EMAIL_HOST_USER: ${DJANGO_EMAIL_HOST_USER:-}
+    DJANGO_EMAIL_HOST_PASSWORD: ${DJANGO_EMAIL_HOST_PASSWORD:-}
+    DJANGO_EMAIL_USE_TLS: ${DJANGO_EMAIL_USE_TLS:-0}
+    DJANGO_EMAIL_USE_SSL: ${DJANGO_EMAIL_USE_SSL:-0}
+    DJANGO_DEFAULT_FROM_EMAIL: ${DJANGO_DEFAULT_FROM_EMAIL:-Anamnes <no-reply@localhost>}
+    POSTGRES_DB: anamnes
+    POSTGRES_USER: anamnes
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    POSTGRES_HOST: db
+    ANAMNES_MEDIA_ROOT: /data/media
+
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: anamnes
+      POSTGRES_USER: anamnes
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "anamnes", "-d", "anamnes"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    <<: *backend
+    pull_policy: never
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["python", "manage.py", "migrate", "--noinput"]
+
+  api:
+    <<: *backend
+    build: ./backend
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - originals:/data/media
+    healthcheck:
+      test: ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/api/auth/session/', timeout=2).close()"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  indexer:
+    <<: *backend
+    pull_policy: never
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - originals:/data/media:ro
+    command: ["python", "manage.py", "index_documents"]
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    depends_on:
+      api:
+        condition: service_healthy
+        restart: true
+    ports:
+      - "127.0.0.1:${ANAMNES_PORT:-5186}:8080"
+    restart: unless-stopped
+
+volumes:
+  postgres:
+  originals:

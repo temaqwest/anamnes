@@ -1,0 +1,15 @@
+*
+!Dockerfile
+!package.json
+!package-lock.json
+!index.html
+!tsconfig.json
+!vite.config.ts
+!steiger.config.mjs
+!nginx.conf
+!src/
+!src/**
+!public/
+!public/**
+**/.env*
+**/*.pdf
