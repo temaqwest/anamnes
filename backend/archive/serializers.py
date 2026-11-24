@@ -12,7 +12,9 @@ from .study_areas import areas_for, normalize_area_name
 
 
 class FilenameBatchSerializer(serializers.Serializer):
-    names = serializers.ListField(child=serializers.CharField(max_length=255), min_length=1, max_length=10)
+    names = serializers.ListField(
+        child=serializers.CharField(max_length=255, trim_whitespace=False), min_length=1, max_length=10,
+    )
 
 
 class DocumentQuerySerializer(serializers.Serializer):

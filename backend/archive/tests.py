@@ -47,13 +47,13 @@ class ArchiveTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [
-            {"title": "УЗИ щитовидной железы", "study_date": "2025-03-14", "area_suggestions": [
+            {"title": "УЗИ щитовидной железы", "study_date": "2025-03-14", "is_duplicate": False, "area_suggestions": [
                 {"slug": "thyroid", "matched_text": "щитовидной железы", "auto_select": True},
             ]},
-            {"title": "Анализы", "study_date": "2025-02-17", "area_suggestions": []},
-            {"title": "Анализы", "study_date": None, "area_suggestions": []},
-            {"title": "Анализы", "study_date": None, "area_suggestions": []},
-            {"title": "2025-03-14 Анализы 2025-04-14", "study_date": None, "area_suggestions": []},
+            {"title": "Анализы", "study_date": "2025-02-17", "area_suggestions": [], "is_duplicate": False},
+            {"title": "Анализы", "study_date": None, "area_suggestions": [], "is_duplicate": False},
+            {"title": "Анализы", "study_date": None, "area_suggestions": [], "is_duplicate": False},
+            {"title": "2025-03-14 Анализы 2025-04-14", "study_date": None, "area_suggestions": [], "is_duplicate": False},
         ])
 
     def test_area_suggestions_use_current_owners_personal_area_and_do_not_save_documents(self):
@@ -76,6 +76,20 @@ class ArchiveTests(TestCase):
         other = self.client.post(url, batch, content_type="application/json")
         self.assertEqual(other.json()[0]["area_suggestions"][0]["slug"], "cardiology")
         self.assertEqual(Client().post(url, batch, content_type="application/json").status_code, 403)
+
+    def test_filename_suggestions_flag_exact_original_names_in_the_owner_archive_only(self):
+        self.assertEqual(self.upload(title="Переименованное исследование").status_code, 201)
+        names = ["2025-03-14_УЗИ.pdf", "2025-03-14_узи.pdf", " 2025-03-14_УЗИ.pdf", "Переименованное исследование.pdf"]
+        payload = {"names": names}
+        url = "/api/documents/suggestions/"
+        response = self.client.post(url, payload, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([item["is_duplicate"] for item in response.json()], [True, False, False, False])
+        self.assertEqual(self.upload().status_code, 201)
+
+        self.client.force_login(self.other)
+        response = self.client.post(url, payload, content_type="application/json")
+        self.assertEqual([item["is_duplicate"] for item in response.json()], [False, False, False, False])
 
     def test_upload_preserves_original_and_uses_confirmed_metadata(self):
         response = self.upload(title="Дуплекс", date="2025-03-12")

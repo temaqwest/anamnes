@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "rest_framework",
     "accounts",
+    "allergies",
     "archive",
     "medications",
 ]

@@ -36,11 +36,20 @@ class AreaDetail(OwnedAreas, generics.UpdateAPIView):
 def suggestions(request):
     batch = FilenameBatchSerializer(data=request.data)
     batch.is_valid(raise_exception=True)
+    names = batch.validated_data["names"]
+    existing_names = set(
+        Document.objects.filter(owner=request.user, original_name__in=names)
+        .order_by().values_list("original_name", flat=True).distinct()
+    )
     personal_slugs = dict(areas_for(request.user).exclude(preset=None).values_list("preset_id", "slug"))
     results = []
-    for name in batch.validated_data["names"]:
+    for name in names:
         metadata = suggest_metadata(name)
-        results.append({**metadata, "area_suggestions": suggest_areas(metadata["title"] or "", personal_slugs)})
+        results.append({
+            **metadata,
+            "area_suggestions": suggest_areas(metadata["title"] or "", personal_slugs),
+            "is_duplicate": name in existing_names,
+        })
     return Response(results)
 
 

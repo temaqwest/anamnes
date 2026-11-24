@@ -67,7 +67,7 @@ def transfer_models():
     return [
         model
         for config in apps.get_app_configs()
-        if config.label in {"auth", "archive", "medications"}
+        if config.label in {"auth", "allergies", "archive", "medications"}
         for model in config.get_models(include_auto_created=True)
         if model not in {Permission, Area} and model._meta.managed and not model._meta.proxy
     ] + [AccountEmail]

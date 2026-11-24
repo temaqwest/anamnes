@@ -17,6 +17,7 @@ RUN addgroup --system --gid 10001 anamnes \
 COPY manage.py .
 COPY anamnes ./anamnes
 COPY accounts ./accounts
+COPY allergies ./allergies
 COPY archive ./archive
 COPY medications ./medications
 

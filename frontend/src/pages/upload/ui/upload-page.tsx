@@ -3,6 +3,7 @@ import { type FormEvent, useRef } from "react"
 import { Link, useLocation, useSearchParams } from "react-router-dom"
 import { StudyAreas, StudyFileFields, type Area } from "@/entities/study"
 import { StudyAreaDialog } from "@/features/edit-study-area"
+import { cn } from "@/shared/lib/cn"
 import { Button } from "@/shared/ui/button"
 import { batchLimit, useUploadBatch } from "../model/use-upload-batch"
 import { AreaSuggestions } from "./area-suggestions"
@@ -55,7 +56,8 @@ export function UploadPage({ areas, onAreaSaved }: { areas: Area[]; onAreaSaved:
         {error && <p role="alert" className="rounded-lg border border-destructive/20 bg-card p-3 text-sm text-destructive">{error}</p>}
         {suggesting && <p role="status" className="text-sm text-muted-foreground">Читаем имена файлов…</p>}
         {entries.map((entry) => (
-          <section key={entry.id} className="space-y-4 rounded-xl border bg-card p-4 sm:p-5">
+          <section key={entry.id} className={cn("space-y-4 rounded-xl border p-4 sm:p-5",
+            entry.isDuplicate ? "border-amber-500/60 bg-amber-50 dark:bg-amber-950/30" : "bg-card")}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-2.5">
                 <FileText size={18} className="shrink-0 text-primary" />
@@ -66,6 +68,11 @@ export function UploadPage({ areas, onAreaSaved }: { areas: Area[]; onAreaSaved:
               ) : <Button variant="ghost" size="icon" type="button" aria-label={"Убрать " + entry.file.name} disabled={sending || suggesting}
                 onClick={() => remove(entry.id)}><X /></Button>}
             </div>
+            {entry.isDuplicate && (
+              <p role="status" className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                Дубликат по имени. PDF с таким именем уже есть в архиве.
+              </p>
+            )}
             {/\.pdf$/i.test(entry.file.name) && (
               <>
                 <StudyFileFields id={entry.id} value={entry.fields} disabled={suggesting || sending || entry.status === "saved"}

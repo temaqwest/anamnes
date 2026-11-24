@@ -28,9 +28,12 @@ class ArchiveTransferTests(SimpleTestCase):
         self.command("source", "shell", "-c", "\n".join([
             "from django.contrib.auth.models import Group, Permission, User",
             "from accounts.models import AccountEmail",
+            "from allergies.models import Allergy",
             "from archive.models import Document, DocumentPage, StudyArea",
             "user = User.objects.create_user(pk=17, username='transfer-user', password='synthetic-only')",
             "AccountEmail.objects.create(user=user, address='transfer@example.test', verified_at='2025-01-01T12:00:00Z')",
+            "Allergy.objects.create(id='22222222-2222-2222-2222-222222222222', owner=user, "
+            "name='Пыльца берёзы', name_key='пыльца берёзы')",
             "group = Group.objects.create(name='Readers')",
             "group.permissions.add(Permission.objects.get(codename='view_document'))",
             "user.groups.add(group)",
@@ -84,6 +87,7 @@ class ArchiveTransferTests(SimpleTestCase):
         source_before = self.source_db.read_bytes()
         output = self.transfer()
         self.assertIn("archive.document: 1", output)
+        self.assertIn("allergies.allergy: 1", output)
         self.assert_empty_target()
         self.assertEqual(self.source_db.read_bytes(), source_before)
 
@@ -91,12 +95,15 @@ class ArchiveTransferTests(SimpleTestCase):
         self.command("target", "shell", "-c", "\n".join([
             "from django.contrib.auth.models import User",
             "from accounts.models import AccountEmail",
+            "from allergies.models import Allergy",
             "from archive.models import Document, DocumentPage",
             "user = User.objects.get(pk=17)",
             "assert user.check_password('synthetic-only')",
             "assert user.get_all_permissions() == {'archive.view_document', 'archive.change_document'}",
             "assert AccountEmail.objects.get(user=user).address == 'transfer@example.test'",
             "assert AccountEmail.objects.get(user=user).verified_at.isoformat() == '2025-01-01T12:00:00+00:00'",
+            "allergy = Allergy.objects.get(pk='22222222-2222-2222-2222-222222222222', owner=user)",
+            "assert (allergy.name, allergy.name_key) == ('Пыльца берёзы', 'пыльца берёзы')",
             f"document = Document.objects.get(pk='{self.key}')",
             "assert document.owner == user",
             "assert document.created_at.isoformat() == '2025-01-02T03:04:05+00:00'",

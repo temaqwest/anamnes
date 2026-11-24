@@ -8,7 +8,12 @@ const fieldLabels: Readonly<Record<string, string>> = {
   areas: "Предметные области",
 }
 
-type Suggestion = { title: string; study_date: string | null; area_suggestions?: StudyAreaSuggestion[] }
+type Suggestion = {
+  title: string
+  study_date: string | null
+  area_suggestions?: StudyAreaSuggestion[]
+  is_duplicate?: boolean
+}
 
 export function listStudyAreas() {
   return api<Area[]>("/areas/")

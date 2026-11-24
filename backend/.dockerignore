@@ -5,6 +5,8 @@
 !anamnes/**
 !accounts/
 !accounts/**
+!allergies/
+!allergies/**
 !archive/
 !archive/**
 !medications/

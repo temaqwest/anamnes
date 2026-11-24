@@ -9,6 +9,7 @@ type Entry = {
   file: File
   fields: StudyFields
   areaSuggestions: StudyAreaSuggestion[]
+  isDuplicate: boolean
   status: "draft" | "sending" | "saved" | "failed"
   issue?: string
   documentId?: string
@@ -41,6 +42,7 @@ export function useUploadBatch(preselected: string[], areas: Area[]) {
       id: crypto.randomUUID(), file, status: "draft",
       fields: { title: file.name.replace(/\.pdf$/i, ""), category: "", study_date: "", areas: preselected },
       areaSuggestions: [],
+      isDuplicate: false,
       issue: /\.pdf$/i.test(file.name) ? undefined : "Выберите файл в формате PDF.",
     }))
     setEntries((current) => [...current, ...pending])
@@ -58,11 +60,12 @@ export function useUploadBatch(preselected: string[], areas: Area[]) {
           return {
             fields: { ...fields, title: suggestion.title, study_date: suggestion.study_date ?? "", areas: areaMatches.selected },
             areaSuggestions: areaMatches.suggestions,
+            isDuplicate: suggestion.is_duplicate === true,
           }
         })
       })
     } catch (error) {
-      setError("Не удалось заполнить поля из имени файла. Их можно заполнить вручную. " + errorMessage(error))
+      setError("Не удалось проверить имена файлов и заполнить поля автоматически. Поля можно заполнить вручную. " + errorMessage(error))
     } finally {
       setSuggesting(false)
     }

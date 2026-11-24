@@ -1,9 +1,10 @@
-import { FolderOpen, LogOut, Pill, Plus } from "lucide-react"
+import { FolderOpen, LogOut, Pill, Plus, ShieldAlert } from "lucide-react"
 import { type ReactNode, useCallback, useEffect, useState } from "react"
 import { Link, Navigate, NavLink, Outlet, Route, Routes } from "react-router-dom"
 import { getSession, signOut, type Session } from "@/entities/session"
 import { listStudyAreas, type Area } from "@/entities/study"
 import { ConfirmEmailPage, RegisterPage, RequestEmailPage, ResetPasswordPage } from "@/pages/account-access"
+import { AllergiesPage } from "@/pages/allergies"
 import { ArchivePage } from "@/pages/archive"
 import { ComparePage } from "@/pages/compare"
 import { DocumentPage } from "@/pages/document"
@@ -117,10 +118,11 @@ function Workspace({ username, onSignOut }: { username: string; onSignOut: (sess
     <div className="min-h-svh pb-[env(safe-area-inset-bottom)]">
       <aside className="sticky top-0 z-20 flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-card px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 lg:fixed lg:inset-y-0 lg:left-0 lg:w-57 lg:flex-nowrap lg:flex-col lg:items-stretch lg:border-r lg:border-b-0 lg:py-6">
         <Link to="/" className="order-1 w-fit lg:mx-2"><Brand /></Link>
-        <nav aria-label="Основная навигация" className="order-3 grid w-full grid-cols-3 gap-1 lg:order-2 lg:mt-10 lg:block lg:space-y-1">
+        <nav aria-label="Основная навигация" className="order-3 grid w-full grid-cols-4 gap-1 lg:order-2 lg:mt-10 lg:block lg:space-y-1">
           <NavLink to="/" end className={navClass}><FolderOpen size={18} />Архив</NavLink>
-          <NavLink to="/upload" className={navClass}><Plus size={18} />Загрузка PDF</NavLink>
+          <NavLink to="/upload" className={navClass}><Plus size={18} /><span>Загрузка<span className="max-[380px]:sr-only"> PDF</span></span></NavLink>
           <NavLink to="/medications" className={navClass}><Pill size={18} />Лекарства</NavLink>
+          <NavLink to="/allergies" className={navClass}><ShieldAlert size={18} aria-hidden="true" />Аллергии</NavLink>
         </nav>
         <div className="order-2 ml-auto lg:order-3 lg:mt-auto lg:ml-0 lg:space-y-2 lg:border-t lg:pt-4">
           <p className="hidden truncate px-2 text-sm font-medium lg:block" title={username}>{username}</p>
@@ -140,6 +142,7 @@ function Workspace({ username, onSignOut }: { username: string; onSignOut: (sess
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/documents/:id" element={areas ? <DocumentPage areas={areas} /> : areaStatus} />
             <Route path="/medications" element={<MedicationsPage />} />
+            <Route path="/allergies" element={<AllergiesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
       </main>

@@ -62,7 +62,10 @@ class Document(models.Model):
 
     class Meta:
         ordering = ["-study_date", "-created_at", "id"]
-        indexes = [models.Index(fields=["owner", "-study_date"])]
+        indexes = [
+            models.Index(fields=["owner", "-study_date"]),
+            models.Index(fields=["owner", "original_name"], name="document_owner_filename_idx"),
+        ]
         constraints = [models.UniqueConstraint(fields=["owner", "upload_key"], name="unique_owner_upload")]
 
 

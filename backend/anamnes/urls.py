@@ -5,6 +5,7 @@ from archive import views
 
 
 urlpatterns = [
+    path("api/allergies/", include("allergies.urls")),
     path("api/medications/", include("medications.urls")),
     path("api/auth/", include("accounts.urls")),
     path("api/areas/", never_cache(views.AreaList.as_view())),
